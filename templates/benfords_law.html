@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+    h1 {
+        text-align: center;
+    }
+    body {
+        font: 10px sans-serif;
+    }
+    p {
+        font: 14px sans-serif;
+        margin-left: 40px;
+        margin-right: 40px;
+    }
+    svg {
+        margin-left:auto;
+        margin-right:auto;
+        display:block;
+    }
+    .axis path, .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+    .x.axis path {
+        display: none;
+    }
+
+</style>
+<body>
+    <title>Benford's Law</title>
+    <h1>Benford's Law</h1>
+
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script>
+
+        // Theoretical Benford values
+        var data = [[0.301, 0.176, 0.125, 0.097, 0.079, 0.067, 0.058, 0.051, 0.046]];
+
+        // Experimental Benford values
+        data.push({{ data }});
+
+        var margin = {top: 20, right: 30, bottom: 30, left: 40},
+            width = 960 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+        var yA = d3.scale.linear()
+            .domain([0, 0.32])
+            .range([height, 0]);
+
+        var yD = d3.scale.linear()
+            .domain([0, 0.32])
+            .range([0, height]);
+
+        var x0 = d3.scale.ordinal()
+            .domain(d3.range(1,data[0].length+1))
+            .rangeBands([0, width], .2);
+
+        var x1 = d3.scale.ordinal()
+            .domain(d3.range(data.length))
+            .rangeBands([1, x0.rangeBand()]);
+
+        var color = d3.scale.ordinal().range(["#595959", "#8D8F90"]);
+
+        var xAxis = d3.svg.axis()
+            .scale(x0)
+            .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+            .scale(yA)
+            .orient("left");
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("svg:g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        svg.append("g").selectAll("g")
+            .data(data)
+          .enter().append("g")
+            .style("fill", function(d, i) { return color(i); })
+            .attr("transform", function(d, i) { return "translate(" + x1(i) + ",0)"; })
+          .selectAll("rect")
+            .data(function(d) { return d; })
+          .enter().append("rect")
+            .attr("width", x1.rangeBand())
+            .attr("height", yD)
+            .attr("x", function(d, i) { return x0(i+1); })
+            .attr("y", function(d) { return height - yD(d); });
+
+        var legend = svg.selectAll(".legend")
+            .data(['Theoretical', 'Experimental'])
+          .enter().append("g")
+            .attr("class", "legend")
+            .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+        legend.append("rect")
+            .attr("x", width - 18)
+            .attr("width", 18)
+            .attr("height", 18)
+            .style("fill", color);
+
+        legend.append("text")
+            .attr("x", width - 24)
+            .attr("y", 9)
+            .attr("dy", ".35em")
+            .style("text-anchor", "end")
+            .text(function(d) { return d; });
+    </script>
+    <p> This graph represents Benford's Law. Benford's law states something
+    about the frequency distribution of the first digit of many naturally
+    occurring random numbers. For example, if you where to measure the hight of
+    trees in a forest, and calculate the frequency distribution of leading
+    digits. Those percentages should generally follow Benford's law.</p> <p>
+    The basic idea is that 1 will show up more frequently than 2, which shows
+    up more frequently than 3, and so on. Benford's Law is most notably used to
+    detect financial fraud. The FBI uses it to measure finance numbers, if
+    those numbers don't line up with what Benford's Law states, that could
+    indicate foul play. I find it very interesting how this law states
+    something about all the numbers in such different data sets. You can find
+    out more about Benford's law <a
+        href="https://en.wikipedia.org/wiki/Benford%27s_law" title="Benford's
+        Law">here</a>.</p>
+    <p> By refreshing the browser on this page you are running your own
+    experimental verification of Benford's law. This page is being served to
+    you by <a href="http://flask.pocoo.org/">Flask</a> which is running a java
+    program server side that calculates the leading digit frequency
+    distribution of randomly selected values from randomly generated normal
+    distribution functions. Check out my post <a
+        href="http://www.dsfcode.com/">here</a> if you'd like more information
+    about how I created this chart.</p>
+</body>
